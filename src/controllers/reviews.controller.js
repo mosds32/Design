@@ -49,7 +49,55 @@ if(getReviews)
     }
     catch(error)
     {
-        throw new ApiError(403, error?.message || "Errro in Reviews");
+        throw new ApiError(403, error?.message || "Error in Reviews");
     }
     
+});
+export const editReview = asyncHandler(async(req, res, next) =>
+{
+    try
+    {
+      const reviewId = req.params.reviewId;
+      const {text, like, rate, courseId} = req.body;
+      const now = new Date();
+const reviewFind = await prisma.reviews.findFirst(
+    {
+        where:
+        {
+            reviews_id: parseInt(reviewId),
+          user_user_id: req.user.user_id
+        }
+    }
+);
+if(!reviewFind)
+{
+    return res.status(202).json(new ApiResponse(202,"Review Text not found"));
+}
+const Updates = await prisma.reviews.update(
+    {
+        data:
+        {
+            reviews_text: text,
+            reviews_like: like,
+            reviews_rate: rate,
+            course_course_id: parseInt(courseId),
+            reviews_modifiedat: now
+        },
+        where:
+        {
+            reviews_id: reviewFind.reviews_id
+        }
+    }
+);
+if(Updates)
+{
+    return res.status(201).json(new ApiResponse(201, "Updated", Updates));
+}
+
+
+    }
+    catch(error)
+    {
+throw new ApiError(403, error?.message || "Review Edited");
+    }
 });
