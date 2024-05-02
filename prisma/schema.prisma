@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model category {
+  category_id         Int       @id @default(autoincrement())
+  category_type       String?   @db.VarChar(45)
+  category_createdat  DateTime? @db.Date
+  category_modifiedat DateTime? @db.Date
+  course              course[]
+}
+
+model course {
+  course_id            Int          @id @default(autoincrement())
+  course_title         String?      @db.VarChar(45)
+  course_img           String?      @db.VarChar(45)
+  course_level         String?      @db.VarChar(45)
+  course_createdat     DateTime?    @db.Date
+  course_modifiedat    DateTime?    @db.Date
+  course_deletedat     DateTime?    @db.Date
+  category_category_id Int
+  category             category     @relation(fields: [category_category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_course_category1")
+  reviews              reviews[]
+  trainer              trainer[]
+  usercourse           usercourse[]
+  video                video[]
+
+  @@index([category_category_id], map: "fk_course_category1_idx")
+}
+
+model login {
+  login_id         Int       @id @default(autoincrement())
+  login_isactive   Int?
+  login_createdat  DateTime? @db.Date
+  login_modifiedat DateTime? @db.Date
+  user_user_id     Int
+  user             user      @relation(fields: [user_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_login_user1")
+
+  @@index([user_user_id], map: "fk_login_user1_idx")
+}
+
+model otp {
+  otp_id         Int       @id @default(autoincrement())
+  otp_number     Int?
+  otp_createdat  DateTime? @db.Date
+  otp_modifiedat DateTime? @db.Date
+  user_user_id   Int
+  user           user      @relation(fields: [user_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_otp_user")
+
+  @@index([user_user_id], map: "fk_otp_user_idx")
+}
+
+model profile {
+  profile_id         Int       @id @default(autoincrement())
+  profile_name       String?   @db.VarChar(45)
+  profile_img        String?   @db.Text
+  profile_dob        DateTime? @db.Date
+  profile_createdat  DateTime? @db.Date
+  profile_modifiedat DateTime? @db.Date
+  user_user_id       Int
+  user               user      @relation(fields: [user_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_profile_user1")
+
+  @@index([user_user_id], map: "fk_profile_user1_idx")
+}
+
+model reviews {
+  reviews_id         Int       @id @default(autoincrement())
+  reviews_text       String?   @db.Text
+  reviews_like       Int?
+  reviews_rate       Int?
+  reviews_createdat  DateTime? @db.Date
+  reviews_modifiedat DateTime? @db.Date
+  course_course_id   Int
+  user_user_id       Int
+  course             course    @relation(fields: [course_course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reviews_course1")
+  user               user      @relation(fields: [user_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reviews_user1")
+
+  @@index([course_course_id], map: "fk_reviews_course1_idx")
+  @@index([user_user_id], map: "fk_reviews_user1_idx")
+}
+
+model trainer {
+  trainer_id         Int           @id @default(autoincrement())
+  trainer_name       String?       @db.VarChar(45)
+  trainer_img        String?       @db.VarChar(45)
+  trainer_experience String?       @db.VarChar(45)
+  trainer_createdat  DateTime?     @db.Date
+  trainer_modifiedat DateTime?     @db.Date
+  course_course_id   Int
+  course             course        @relation(fields: [course_course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_trainer_course1")
+  usertrainer        usertrainer[]
+
+  @@index([course_course_id], map: "fk_trainer_course1_idx")
+}
+
+model user {
+  user_id         Int           @id @default(autoincrement())
+  user_name       String?       @db.VarChar(45)
+  user_email      String?       @db.VarChar(45)
+  user_password   String?       @db.VarChar(445)
+  user_isverify   Int?
+  user_role       String?       @db.VarChar(45)
+  user_createdat  DateTime?     @db.Date
+  user_modifiedat DateTime?     @db.Date
+  user_deletedat  DateTime?     @db.Date
+  login           login[]
+  otp             otp[]
+  profile         profile[]
+  reviews         reviews[]
+  usercourse      usercourse[]
+  usertrainer     usertrainer[]
+  uservideo       uservideo[]
+}
+
+model usercourse {
+  usercourse_id         Int       @id @default(autoincrement())
+  usercourse_date       DateTime? @db.Date
+  usercourse_createdat  DateTime? @db.Date
+  usercourse_modifiedat DateTime? @db.Date
+  course_course_id      Int
+  user_user_id          Int
+  course                course    @relation(fields: [course_course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usercourse_course1")
+  user                  user      @relation(fields: [user_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usercourse_user1")
+
+  @@index([course_course_id], map: "fk_usercourse_course1_idx")
+  @@index([user_user_id], map: "fk_usercourse_user1_idx")
+}
+
+model video {
+  video_id         Int         @id @default(autoincrement())
+  video_title      String?     @db.VarChar(45)
+  video_url        String?     @db.VarChar(45)
+  video_createdat  DateTime?   @db.Date
+  video_modifiedat DateTime?   @db.Date
+  course_course_id Int
+  uservideo        uservideo[]
+  course           course      @relation(fields: [course_course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_video_course1")
+
+  @@index([course_course_id], map: "fk_video_course1_idx")
+}
+
+model usertrainer {
+  usertrainer_id         Int       @id @default(autoincrement())
+  usertrainer_date       DateTime? @db.DateTime(0)
+  usertrainer_createdat  DateTime? @db.DateTime(0)
+  usertrainer_modifiedat DateTime? @db.DateTime(0)
+  trainer_trainer_id     Int
+  user_user_id           Int
+  trainer                trainer   @relation(fields: [trainer_trainer_id], references: [trainer_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usertrainer_trainer1")
+  user                   user      @relation(fields: [user_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usertrainer_user1")
+
+  @@index([trainer_trainer_id], map: "fk_usertrainer_trainer1_idx")
+  @@index([user_user_id], map: "fk_usertrainer_user1_idx")
+}
+
+model uservideo {
+  uservideo_id         Int       @id @default(autoincrement())
+  uservideo_date       DateTime? @db.DateTime(0)
+  uservideo_createdat  DateTime? @db.DateTime(0)
+  uservideo_modifiedat DateTime? @db.DateTime(0)
+  video_video_id       Int
+  user_user_id         Int
+  user                 user      @relation(fields: [user_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_uservideo_user1")
+  video                video     @relation(fields: [video_video_id], references: [video_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_uservideo_video1")
+
+  @@index([user_user_id], map: "fk_uservideo_user1_idx")
+  @@index([video_video_id], map: "fk_uservideo_video1_idx")
+}
